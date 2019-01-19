@@ -31,7 +31,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.github.smartsatu:android-core-ktx:0.0.2'
+    implementation 'com.github.smartsatu:android-core-ktx:0.0.5'
     implementation 'com.github.smartsatu:android-live:0.0.1'
 
     // Android lifecycle
