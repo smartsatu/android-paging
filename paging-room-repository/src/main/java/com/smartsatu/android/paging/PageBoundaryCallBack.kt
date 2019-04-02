@@ -15,6 +15,7 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
         private val itemLoadedCount: () -> Int
 ) : PagedList.BoundaryCallback<Item>() {
 
+    private var lastPageWasNotFull = false
     lateinit var params: Param
     private var subscriptions = CompositeDisposable()
     private val helper = PagingRequestHelper(ioExecutor)
@@ -22,7 +23,9 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     val initialLoadState = MutableLiveData<NetworkState>()
     private var awaitForMoreItems = true
 
+
     override fun onZeroItemsLoaded() {
+        lastPageWasNotFull = false
         awaitForMoreItems = false
         helper.runIfNotRunning(PagingRequestHelper.RequestType.INITIAL) {
             initialLoadState.postValue(NetworkState.LOADING)
@@ -32,6 +35,7 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
             val subscription = Observable.zip(itemsObservable, Observable.just(it),
                     BiFunction<List<Item>, PagingRequestHelper.Request.Callback, PageResponse<Item>> { items, callback -> PageResponse(items, callback) })
                     .subscribeOn(Schedulers.from(ioExecutor))
+                    .doOnNext { lastPageWasNotFull = it.items.size < params.pageSize }
                     .subscribe({ handleSuccess(it) }, { handleError(it, pagingRequestCallBack) })
             subscriptions.add(subscription)
         }
@@ -40,8 +44,12 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     override fun onItemAtEndLoaded(itemAtEnd: Item) {
         // Dynamically calculate from what page we should load
         if (awaitForMoreItems) {
+            // TODO: Fix me urgently cause it's not really right way to check fr
             params.page = itemLoadedCount.invoke() / params.pageSize
             awaitForMoreItems = false
+        }
+        if (lastPageWasNotFull) {
+            return
         }
         helper.runIfNotRunning(PagingRequestHelper.RequestType.AFTER) {
             networkState.postValue(NetworkState.LOADING)
@@ -54,6 +62,7 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
             val subscription = Observable.zip(itemsObservable, Observable.just(it),
                     BiFunction<List<Item>, PagingRequestHelper.Request.Callback, PageResponse<Item>> { items, callback -> PageResponse(items, callback) })
                     .subscribeOn(Schedulers.from(ioExecutor))
+                    .doOnNext { lastPageWasNotFull = it.items.size < params.pageSize }
                     .subscribe({ handleSuccess(it) }, { handleError(it, pagingRequestCallBack) })
             subscriptions.add(subscription)
         }
