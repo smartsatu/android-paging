@@ -27,7 +27,10 @@ abstract class PagingRoomRepository<Param : PagingParams, Item> : PaginationRepo
 
     private lateinit var livePagedList: LiveData<PagedList<Item>>
 
+    @Deprecated("Method will never be called. Override fun clearRoom(params: Param) instead")
     abstract fun clearRoom()
+
+    open fun clearRoom(params: Param) = Unit
 
     abstract fun provideNetworkExecutor(): Executor
 
@@ -36,13 +39,11 @@ abstract class PagingRoomRepository<Param : PagingParams, Item> : PaginationRepo
     abstract fun requestAndStoreData(params: Param): Observable<List<Item>>
 
     private fun refresh() {
-        //clearRoom()
         boundaryCallback.onZeroItemsLoaded()
     }
 
     @MainThread
     override fun fetchPaging(params: Param): Paging<Item> {
-        //clearRoom()
         boundaryCallback.params = params
 
         val dataSourceFactory = provideDataSourceFactory(params)
@@ -62,12 +63,14 @@ abstract class PagingRoomRepository<Param : PagingParams, Item> : PaginationRepo
                 },
                 refresh = {
                     //livePagedList.value?.dataSource?.invalidate()
-                    clearRoom()
-                    refresh()
+                    Executors.newSingleThreadExecutor().execute {
+                        clearRoom(params)
+                        refresh()
+                    }
                 },
                 refreshState = boundaryCallback.initialLoadState,
                 shutdown = {
-                    //clearRoom()
+                    clearRoom(params)
                     boundaryCallback.networkState.value = NetworkState.EMPTY
                 })
     }
