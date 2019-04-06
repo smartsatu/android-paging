@@ -10,7 +10,7 @@ import io.reactivex.Observable
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
-abstract class PagingRoomRepository<Param : PagingParams, Item> : PaginationRepository<Param, Item> {
+abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLocalOnly: Boolean = false) : PaginationRepository<Param, Item> {
 
     private val boundaryCallback: PageBoundaryCallBack<Param, Item> by lazy {
         PageBoundaryCallBack(Executors.newSingleThreadExecutor(), this::requestAndStoreData, this::itemLoadedCount)
@@ -52,7 +52,7 @@ abstract class PagingRoomRepository<Param : PagingParams, Item> : PaginationRepo
                 // provide custom executor for network requests, otherwise it will default to
                 // Arch Components' IO pool which is also used for disk access
                 .setFetchExecutor(provideNetworkExecutor())
-                .setBoundaryCallback(boundaryCallback)
+                .apply { if (!isLocalOnly) this.setBoundaryCallback(boundaryCallback) }
                 .build()
 
         return Paging(
