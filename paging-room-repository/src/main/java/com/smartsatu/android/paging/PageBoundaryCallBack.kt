@@ -22,9 +22,13 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     val networkState = MutableLiveData<NetworkState>()
     val initialLoadState = MutableLiveData<NetworkState>()
     private var awaitForMoreItems = true
-
+    var isShuttingDown = false
 
     override fun onZeroItemsLoaded() {
+        if (isShuttingDown) {
+            isShuttingDown = false
+            return
+        }
         lastPageWasNotFull = false
         awaitForMoreItems = false
         helper.runIfNotRunning(PagingRequestHelper.RequestType.INITIAL) {

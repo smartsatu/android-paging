@@ -70,8 +70,9 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
                 },
                 refreshState = boundaryCallback.initialLoadState,
                 shutdown = {
+                    boundaryCallback.isShuttingDown = true
                     clearRoom(params)
-                    boundaryCallback.networkState.value = NetworkState.EMPTY
+                    boundaryCallback.networkState.postValue(NetworkState.EMPTY)
                 })
     }
 
