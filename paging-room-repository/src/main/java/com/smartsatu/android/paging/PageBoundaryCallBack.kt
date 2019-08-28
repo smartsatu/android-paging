@@ -3,7 +3,7 @@ package com.smartsatu.android.paging
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.PagedList
 import com.smartsatu.android.live.NetworkState
-import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService
 
 internal class PageBoundaryCallBack<Param : PagingParams, Item>(
         private val ioExecutor: ExecutorService,
-        private val requestHandler: (params: Param) -> Observable<List<Item>>,
+        private val requestHandler: (params: Param) -> Single<List<Item>>,
         private val itemLoadedCount: () -> Int
 ) : PagedList.BoundaryCallback<Item>() {
 
@@ -35,11 +35,11 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
             initialLoadState.postValue(NetworkState.LOADING)
             params.page = 1
             val pagingRequestCallBack = it
-            val itemsObservable = requestHandler(params)
-            val subscription = Observable.zip(itemsObservable, Observable.just(it),
+            val itemsSingle = requestHandler(params)
+            val subscription = Single.zip(itemsSingle, Single.just(it),
                     BiFunction<List<Item>, PagingRequestHelper.Request.Callback, PageResponse<Item>> { items, callback -> PageResponse(items, callback) })
                     .subscribeOn(Schedulers.from(ioExecutor))
-                    .doOnNext { lastPageWasNotFull = it.items.size < params.pageSize }
+                    .doOnSuccess { lastPageWasNotFull = it.items.size < params.pageSize }
                     .subscribe({ handleSuccess(it) }, { handleError(it, pagingRequestCallBack) })
             subscriptions.add(subscription)
         }
@@ -62,11 +62,11 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
             // Or we must be sure that no items are preloaded for just selected page (specific category id or something similar)
             params.nextPage()
             val pagingRequestCallBack = it
-            val itemsObservable = requestHandler(params)
-            val subscription = Observable.zip(itemsObservable, Observable.just(it),
+            val itemsSingle = requestHandler(params)
+            val subscription = Single.zip(itemsSingle, Single.just(it),
                     BiFunction<List<Item>, PagingRequestHelper.Request.Callback, PageResponse<Item>> { items, callback -> PageResponse(items, callback) })
                     .subscribeOn(Schedulers.from(ioExecutor))
-                    .doOnNext { lastPageWasNotFull = it.items.size < params.pageSize }
+                    .doOnSuccess { lastPageWasNotFull = it.items.size < params.pageSize }
                     .subscribe({ handleSuccess(it) }, { handleError(it, pagingRequestCallBack) })
             subscriptions.add(subscription)
         }

@@ -6,7 +6,7 @@ import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import com.smartsatu.android.live.NetworkState
-import io.reactivex.Observable
+import io.reactivex.Single
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
@@ -36,7 +36,7 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
 
     abstract fun provideDataSourceFactory(params: Param): DataSource.Factory<Int, Item>
 
-    abstract fun requestAndStoreData(params: Param): Observable<List<Item>>
+    abstract fun requestAndStoreData(params: Param): Single<List<Item>>
 
     private fun refresh() {
         boundaryCallback.onZeroItemsLoaded()
