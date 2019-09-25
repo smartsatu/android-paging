@@ -44,6 +44,7 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
 
     @MainThread
     override fun fetchPaging(params: Param): Paging<Item> {
+        boundaryCallback.isShuttingDown = false
         boundaryCallback.params = params
 
         val dataSourceFactory = provideDataSourceFactory(params)
