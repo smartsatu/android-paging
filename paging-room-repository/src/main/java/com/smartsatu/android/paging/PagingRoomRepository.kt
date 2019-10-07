@@ -44,11 +44,15 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
 
     @MainThread
     override fun fetchPaging(params: Param): Paging<Item> {
+//        // Before fetching make sure that room is cleared:
+//        Executors.newSingleThreadExecutor().execute {
+//            clearRoom(params)
+//        }
+
         boundaryCallback.isShuttingDown = false
         boundaryCallback.params = params
 
         val dataSourceFactory = provideDataSourceFactory(params)
-
         livePagedList = LivePagedListBuilder(dataSourceFactory, pagedListConfig)
                 // provide custom executor for network requests, otherwise it will default to
                 // Arch Components' IO pool which is also used for disk access

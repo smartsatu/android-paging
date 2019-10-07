@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.smartsatu.android.paging.example.data.local.UserDatabase
 import com.smartsatu.android.paging.example.data.local.model.User
-import io.reactivex.Observable
+import io.reactivex.Single
 import java.util.concurrent.TimeUnit
 
 object UsersRepository {
@@ -18,13 +18,13 @@ object UsersRepository {
                 .build()
     }
 
-    fun requestUsers(page: Int, pageSize: Int): Observable<List<User>> {
+    fun requestUsers(page: Int, pageSize: Int): Single<List<User>> {
         return if (page <= PAGES_COUNT) {
-            Observable.just(generateUserData(page, pageSize)).doOnNext {
-                UsersRepository.room.userDao().insertAll(it)
+            Single.just(generateUserData(page, pageSize)).doOnSuccess {
+                room.userDao().insertAll(it)
             }
         } else {
-            Observable.just(listOf())
+            Single.just(listOf())
         }.delay(2, TimeUnit.SECONDS)
     }
 
