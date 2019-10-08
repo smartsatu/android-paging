@@ -7,6 +7,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import java.util.concurrent.ExecutorService
 
 internal class PageBoundaryCallBack<Param : PagingParams, Item>(
@@ -22,9 +23,11 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     val networkState = MutableLiveData<NetworkState>()
     val initialLoadState = MutableLiveData<NetworkState>()
     private var awaitForMoreItems = true
+    @Volatile
     var isShuttingDown = false
 
     override fun onZeroItemsLoaded() {
+        Timber.d("isShuttingDown: $isShuttingDown")
         if (isShuttingDown) {
             isShuttingDown = false
             return
@@ -39,6 +42,11 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
             val subscription = Single.zip(itemsSingle, Single.just(it),
                     BiFunction<List<Item>, PagingRequestHelper.Request.Callback, PageResponse<Item>> { items, callback -> PageResponse(items, callback) })
                     .subscribeOn(Schedulers.from(ioExecutor))
+                    .doOnDispose {
+                        Timber.d("Dispose: ${pagingRequestCallBack.requestType.name}")
+                        pagingRequestCallBack.recordCanceled()
+                        initialLoadState.postValue(NetworkState.EMPTY)
+                    }
                     .doOnSuccess { lastPageWasNotFull = it.items.size < params.pageSize }
                     .subscribe({ handleSuccess(it) }, { handleError(it, pagingRequestCallBack) })
             subscriptions.add(subscription)
@@ -66,6 +74,11 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
             val subscription = Single.zip(itemsSingle, Single.just(it),
                     BiFunction<List<Item>, PagingRequestHelper.Request.Callback, PageResponse<Item>> { items, callback -> PageResponse(items, callback) })
                     .subscribeOn(Schedulers.from(ioExecutor))
+                    .doOnDispose {
+                        Timber.d("Dispose: ${pagingRequestCallBack.requestType.name}")
+                        pagingRequestCallBack.recordCanceled()
+                        networkState.postValue(NetworkState.EMPTY)
+                    }
                     .doOnSuccess { lastPageWasNotFull = it.items.size < params.pageSize }
                     .subscribe({ handleSuccess(it) }, { handleError(it, pagingRequestCallBack) })
             subscriptions.add(subscription)
@@ -73,6 +86,7 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     }
 
     private fun handleSuccess(pageResponse: PageResponse<Item>) {
+        Timber.d("Success: ${pageResponse.callback.requestType.name}")
         if (params.page == 1 && pageResponse.items.isEmpty()) {
             if (pageResponse.callback.requestType == PagingRequestHelper.RequestType.INITIAL) {
                 initialLoadState.postValue(NetworkState.EMPTY)
@@ -90,12 +104,20 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     }
 
     private fun handleError(throwable: Throwable, callback: PagingRequestHelper.Request.Callback) {
+        Timber.d("Error: ${callback.requestType.name}")
         if (callback.requestType == PagingRequestHelper.RequestType.INITIAL) {
             initialLoadState.postValue(NetworkState.ERROR)
         } else {
             networkState.postValue(NetworkState.ERROR)
         }
         callback.recordFailure(throwable)
+    }
+
+    fun shutdown() {
+        isShuttingDown = true
+        subscriptions.clear()
+        initialLoadState.postValue(NetworkState.EMPTY)
+        networkState.postValue(NetworkState.EMPTY)
     }
 
     data class PageResponse<Item>(val items: List<Item>, val callback: PagingRequestHelper.Request.Callback)

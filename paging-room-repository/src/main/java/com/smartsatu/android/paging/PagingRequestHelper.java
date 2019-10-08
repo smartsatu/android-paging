@@ -308,6 +308,19 @@ public class PagingRequestHelper {
             }
 
             /**
+             * Call this method when the request was disposed
+             */
+            @SuppressWarnings("unused")
+            public final void recordCanceled() {
+                if (mCalled.compareAndSet(false, true)) {
+                    mHelper.recordResult(mWrapper, null);
+                } else {
+                    throw new IllegalArgumentException(
+                            "already called recordSuccess or recordFailure or recordCanceled");
+                }
+            }
+
+            /**
              * Call this method when the request succeeds and new data is fetched.
              */
             @SuppressWarnings("unused")
@@ -316,7 +329,7 @@ public class PagingRequestHelper {
                     mHelper.recordResult(mWrapper, null);
                 } else {
                     throw new IllegalStateException(
-                            "already called recordSuccess or recordFailure");
+                            "already called recordSuccess or recordFailure or recordCanceled");
                 }
             }
             /**
@@ -336,7 +349,7 @@ public class PagingRequestHelper {
                     mHelper.recordResult(mWrapper, throwable);
                 } else {
                     throw new IllegalStateException(
-                            "already called recordSuccess or recordFailure");
+                            "already called recordSuccess or recordFailure or recordCanceled");
                 }
             }
         }

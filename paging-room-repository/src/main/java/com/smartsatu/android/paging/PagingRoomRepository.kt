@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
-import com.smartsatu.android.live.NetworkState
 import io.reactivex.Single
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -67,17 +66,17 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
                     // TODO: Retry all latest failed results
                 },
                 refresh = {
-                    //livePagedList.value?.dataSource?.invalidate()
                     Executors.newSingleThreadExecutor().execute {
+                        boundaryCallback.isShuttingDown = false
                         clearRoom(params)
-                        refresh()
+                        // It is required in case room is empty
+                        livePagedList.value?.dataSource?.invalidate()
                     }
                 },
                 refreshState = boundaryCallback.initialLoadState,
                 shutdown = {
-                    boundaryCallback.isShuttingDown = true
+                    boundaryCallback.shutdown()
                     clearRoom(params)
-                    boundaryCallback.networkState.postValue(NetworkState.EMPTY)
                 })
     }
 
