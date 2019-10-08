@@ -66,6 +66,14 @@ class UsersFragment : Fragment() {
             when (it.status) {
                 Status.RUNNING -> snackBar.show()
                 Status.SUCCESS -> snackBar.dismiss()
+                Status.FAILED -> {
+                    snackBar.dismiss()
+                    val errorSnackBar = Snackbar.make(requireView(), "Error occurred: ${it.message}", Snackbar.LENGTH_INDEFINITE)
+                    errorSnackBar.setAction("Refresh") {
+                        usersViewModel.refresh()
+                        errorSnackBar.dismiss()
+                    }
+                }
                 else -> {
                 }
             }
