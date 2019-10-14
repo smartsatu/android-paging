@@ -106,9 +106,9 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
     private fun handleError(throwable: Throwable, callback: PagingRequestHelper.Request.Callback) {
         Timber.d("Error: ${callback.requestType.name}")
         if (callback.requestType == PagingRequestHelper.RequestType.INITIAL) {
-            initialLoadState.postValue(NetworkState.ERROR)
+            initialLoadState.postValue(NetworkState.error(throwable.message, throwable))
         } else {
-            networkState.postValue(NetworkState.ERROR)
+            networkState.postValue(NetworkState.error(throwable.message, throwable))
         }
         callback.recordFailure(throwable)
     }
