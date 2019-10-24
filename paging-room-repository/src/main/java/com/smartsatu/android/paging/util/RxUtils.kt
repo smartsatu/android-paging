@@ -1,5 +1,6 @@
 package com.smartsatu.android.paging.util
 
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -19,6 +20,13 @@ fun <T : Any> Observable<T>.uiSubscribe(
 ): Disposable = subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(onNext, onError, onComplete)
+
+fun Completable.uiSubscribe(
+        onComplete: () -> Unit = onCompleteStub,
+        onError: (Throwable) -> Unit = onErrorStub
+): Disposable = subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(onComplete, onError)
 
 operator fun CompositeDisposable.plusAssign(disposable: Disposable) {
     add(disposable)
