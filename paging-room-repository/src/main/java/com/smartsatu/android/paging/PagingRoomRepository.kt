@@ -62,7 +62,12 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
                 .apply { if (!isLocalOnly) this.setBoundaryCallback(boundaryCallback) }
                 .build()
 
-        val paging = Paging(
+        val shutdownCompletable = Completable.fromCallable {
+            boundaryCallback.shutdown()
+            clearRoom(params)
+        }
+
+        return Paging(
                 pagedList = livePagedList,
                 networkState = boundaryCallback.networkState,
                 retry = {
@@ -78,16 +83,13 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
                 },
                 refreshState = boundaryCallback.initialLoadState,
                 shutdown = {
-                    Completable.fromCallable {
-                        boundaryCallback.shutdown()
-                        clearRoom(params)
-                    }.uiSubscribe(onComplete = {
-                        it.invoke()
-                    }, onError = {
-                        boundaryCallback.networkState.postValue(NetworkState.error(it.message, it))
-                    })
-                })
-        return paging
+                    shutdownCompletable.uiSubscribe(
+                            onComplete = { it.invoke() },
+                            onError = {
+                                boundaryCallback.networkState.postValue(NetworkState.error(it.message, it))
+                            })
+                },
+                shutdownCompletable = shutdownCompletable)
     }
 
     private fun itemLoadedCount(): Int {

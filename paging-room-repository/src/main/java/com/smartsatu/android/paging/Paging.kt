@@ -3,6 +3,7 @@ package com.smartsatu.android.paging
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
 import com.smartsatu.android.live.NetworkState
+import io.reactivex.Completable
 
 typealias ShutdownCallbackStub = () -> Unit
 
@@ -12,5 +13,6 @@ data class Paging<T>(
         val refreshState: LiveData<NetworkState>,
         val refresh: () -> Unit,
         val retry: () -> Unit,
-        val shutdown: (callback: ShutdownCallbackStub) -> Unit
+        val shutdown: (callback: ShutdownCallbackStub) -> Unit,
+        val shutdownCompletable: Completable? = null
 )
