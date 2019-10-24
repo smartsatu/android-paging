@@ -5,6 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
+import com.smartsatu.android.live.NetworkState
+import com.smartsatu.android.paging.util.uiSubscribe
+import io.reactivex.Completable
 import io.reactivex.Single
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -59,7 +62,7 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
                 .apply { if (!isLocalOnly) this.setBoundaryCallback(boundaryCallback) }
                 .build()
 
-        return Paging(
+        val paging = Paging(
                 pagedList = livePagedList,
                 networkState = boundaryCallback.networkState,
                 retry = {
@@ -75,9 +78,16 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
                 },
                 refreshState = boundaryCallback.initialLoadState,
                 shutdown = {
-                    boundaryCallback.shutdown()
-                    clearRoom(params)
+                    Completable.fromCallable {
+                        boundaryCallback.shutdown()
+                        clearRoom(params)
+                    }.uiSubscribe(onComplete = {
+                        it.invoke()
+                    }, onError = {
+                        boundaryCallback.networkState.postValue(NetworkState.error(it.message, it))
+                    })
                 })
+        return paging
     }
 
     private fun itemLoadedCount(): Int {
