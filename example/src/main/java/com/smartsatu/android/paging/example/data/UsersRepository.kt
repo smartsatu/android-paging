@@ -1,6 +1,8 @@
 package com.smartsatu.android.paging.example.data
 
 import android.content.Context
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import androidx.room.Room
 import com.smartsatu.android.paging.example.data.local.UserDatabase
 import com.smartsatu.android.paging.example.data.local.model.User
@@ -9,7 +11,9 @@ import timber.log.Timber
 
 object UsersRepository {
 
-    private const val PAGES_COUNT = 5
+    private val pagesCountMutable = MutableLiveData<Int>().apply { value = 0 }
+    val pagesCount = Transformations.map(pagesCountMutable) { it }
+
     lateinit var room: UserDatabase
 
     fun initDb(context: Context) {
@@ -18,8 +22,16 @@ object UsersRepository {
                 .build()
     }
 
+    fun addPage() {
+        pagesCountMutable.value = pagesCountMutable.value?.plus(1)
+    }
+
+    fun empty() {
+        pagesCountMutable.value = 0
+    }
+
     fun requestUsers(page: Int, pageSize: Int): Single<List<User>> {
-        return if (page <= PAGES_COUNT) {
+        return if (page <= pagesCountMutable.value ?: 0) {
             Single.fromCallable {
                 try {
                     Thread.sleep(2000)

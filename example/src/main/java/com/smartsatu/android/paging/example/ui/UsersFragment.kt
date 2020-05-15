@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.smartsatu.android.live.Status
 import com.smartsatu.android.paging.example.R
+import com.smartsatu.android.paging.example.data.UsersRepository
 import com.smartsatu.android.paging.example.databinding.FragmentUsersBinding
-import java.util.concurrent.Executors
 
 class UsersFragment : Fragment() {
 
@@ -34,7 +34,7 @@ class UsersFragment : Fragment() {
     }
 
     private val snackBar by lazy {
-        Snackbar.make(requireView(), "Подгружаются данные...", Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(requireView(), R.string.loadingMore, Snackbar.LENGTH_INDEFINITE)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,10 +87,16 @@ class UsersFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.menuItemAddPage -> {
+                UsersRepository.addPage()
+                true
+            }
             R.id.menuItemClear -> {
-                Executors.newSingleThreadExecutor().execute {
-                    usersViewModel.cancel()
-                }
+                usersViewModel.cancel()
+                true
+            }
+            R.id.menuItemEmpty -> {
+                UsersRepository.empty()
                 true
             }
             else -> {

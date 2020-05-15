@@ -25,6 +25,11 @@ class UsersViewModel(application: Application) : LiveViewModel(application) {
 
     val users = Transformations.switchMap(usersPaging) { it.pagedList }
 
+    val totalPages = Transformations.map(UsersRepository.pagesCount) { it.toString() }
+    val currentPage = Transformations.map(users) {
+        (it.size / (params.value?.pageSize ?: 1)).toString()
+    }
+
     val networkState = Transformations.switchMap(usersPaging) {
         MediatorLiveData<NetworkState>().apply {
             addSource(it.networkState) {

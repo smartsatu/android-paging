@@ -3,4 +3,9 @@
     <string name="clear">Clear</string>
     <string name="samples">Samples</string>
     <string name="users">Users</string>
+    <string name="add_page">Add page</string>
+    <string name="empty">Empty</string>
+    <string name="loaded_pages">Loaded pages</string>
+    <string name="total_pages">Total pages</string>
+    <string name="loadingMore">Loading more items…</string>
 </resources>

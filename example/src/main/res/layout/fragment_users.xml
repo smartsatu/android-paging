@@ -11,30 +11,78 @@
             type="com.smartsatu.android.paging.example.ui.UsersViewModel" />
     </data>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:onRefreshListener="@{() -> viewModel.refresh()}"
-        bind:refreshing="@{viewModel.isRefreshing}">
+        android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:theme="@style/Widget.MaterialComponents.AppBarLayout.Surface">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/usersRecycler"
+            <androidx.gridlayout.widget.GridLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:itemCount="5"
-                tools:listitem="@layout/item_user" />
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="16dp"
+                app:columnCount="2">
 
-            <include
-                layout="@layout/merge_live_state"
-                bind:viewModel="@{viewModel}" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                <TextView
+                    android:gravity="center"
+                    android:text="@string/total_pages"
+                    android:textAppearance="?textAppearanceCaption"
+                    app:layout_columnWeight="1"
+                    app:layout_gravity="fill" />
+
+                <TextView
+                    android:gravity="center"
+                    android:text="@string/loaded_pages"
+                    android:textAppearance="?textAppearanceCaption"
+                    app:layout_columnWeight="1"
+                    app:layout_gravity="fill" />
+
+                <TextView
+                    android:gravity="center"
+                    android:text="@{viewModel.totalPages}"
+                    android:textAppearance="?textAppearanceHeadline6"
+                    app:layout_columnWeight="1"
+                    app:layout_gravity="fill" />
+
+                <TextView
+                    android:gravity="center"
+                    android:text="@{viewModel.currentPage}"
+                    android:textAppearance="?textAppearanceHeadline6"
+                    app:layout_columnWeight="1"
+                    app:layout_gravity="fill" />
+            </androidx.gridlayout.widget.GridLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+            app:onRefreshListener="@{() -> viewModel.refresh()}"
+            bind:refreshing="@{viewModel.isRefreshing}">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/usersRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:itemCount="5"
+                    tools:listitem="@layout/item_user" />
+
+                <include
+                    layout="@layout/merge_live_state"
+                    bind:viewModel="@{viewModel}" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>
