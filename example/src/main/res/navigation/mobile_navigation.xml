@@ -3,11 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@id/usersFragment">
+    app:startDestination="@id/samplesFragment">
+
+    <fragment
+        android:id="@+id/samplesFragment"
+        android:name="com.smartsatu.android.paging.example.ui.SamplesFragment"
+        android:label="@string/samples">
+        <action
+            android:id="@+id/action_samplesFragment_to_usersFragment"
+            app:destination="@id/usersFragment" />
+        <action
+            android:id="@+id/action_samplesFragment_to_epoxyUsersFragment"
+            app:destination="@id/epoxyUsersFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/usersFragment"
         android:name="com.smartsatu.android.paging.example.ui.UsersFragment"
-        android:label="Users"
+        android:label="@string/users"
+        tools:layout="@layout/fragment_users" />
+
+    <fragment
+        android:id="@+id/epoxyUsersFragment"
+        android:name="com.smartsatu.android.paging.example.ui.epoxy.EpoxyUsersFragment"
+        android:label="EpoxyUsersFragment"
         tools:layout="@layout/fragment_users" />
 </navigation>
