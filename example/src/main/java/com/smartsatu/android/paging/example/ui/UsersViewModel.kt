@@ -54,7 +54,7 @@ class UsersViewModel(application: Application) : LiveViewModel(application) {
         params.value = UserParams()
     }
 
-    fun refresh() {
+    override fun refresh() {
         usersPaging.value?.refresh?.invoke()
     }
 
