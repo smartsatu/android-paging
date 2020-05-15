@@ -27,10 +27,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // SmartSatu
-    implementation 'com.github.smartsatu:android-live:0.0.5'
+    implementation 'com.github.smartsatu:android-live:0.0.12'
 
     // Android paging
-    implementation 'androidx.paging:paging-runtime:2.1.0'
+    implementation 'androidx.paging:paging-runtime:2.1.2'
 
     // Rx
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
