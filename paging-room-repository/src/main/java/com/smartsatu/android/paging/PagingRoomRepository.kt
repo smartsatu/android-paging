@@ -29,9 +29,6 @@ abstract class PagingRoomRepository<Param : PagingParams, Item>(private val isLo
 
     private lateinit var livePagedList: LiveData<PagedList<Item>>
 
-    @Deprecated("Method will never be called. Override fun clearRoom(params: Param) instead")
-    abstract fun clearRoom()
-
     open fun clearRoom(params: Param) = Unit
 
     abstract fun provideNetworkExecutor(): Executor
