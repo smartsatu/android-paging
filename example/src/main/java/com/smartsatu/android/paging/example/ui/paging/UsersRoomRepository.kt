@@ -10,9 +10,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 
 class UsersRoomRepository(private val usersRepository: UsersRepository) : PagingRoomRepository<UserParams, User>() {
-    override fun clearRoom() {
-        // Legacy
-    }
 
     override fun clearRoom(params: UserParams) {
         usersRepository.room.userDao().deleteAll()
