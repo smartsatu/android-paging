@@ -59,6 +59,6 @@ class UsersViewModel(application: Application) : LiveViewModel(application) {
     }
 
     fun cancel() {
-        usersPaging.value?.shutdown?.invoke() {}
+        usersPaging.value?.shutdown?.invoke(false) {}
     }
 }
