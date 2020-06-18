@@ -27,7 +27,7 @@ class UsersViewModel(application: Application) : LiveViewModel(application) {
 
     val totalPages = Transformations.map(UsersRepository.pagesCount) { it.toString() }
     val currentPage = Transformations.map(users) {
-        (it.size / (params.value?.pageSize ?: 1)).toString()
+        (it.loadedCount / (params.value?.pageSize ?: 1)).toString()
     }
 
     val networkState = Transformations.switchMap(usersPaging) {
