@@ -113,11 +113,18 @@ internal class PageBoundaryCallBack<Param : PagingParams, Item>(
         callback.recordFailure(throwable)
     }
 
-    fun shutdown() {
+    /**
+     * Dispose all postponed requests and control if empty state should be propagated to UI
+     *
+     * @param skipEmptyState means that a new request will be made immediately after shutdown
+     */
+    fun shutdown(skipEmptyState: Boolean) {
         isShuttingDown = true
         subscriptions.clear()
-        initialLoadState.postValue(NetworkState.EMPTY)
-        networkState.postValue(NetworkState.EMPTY)
+        if (!skipEmptyState) {
+            initialLoadState.postValue(NetworkState.EMPTY)
+            networkState.postValue(NetworkState.EMPTY)
+        }
     }
 
     data class PageResponse<Item>(val items: List<Item>, val callback: PagingRequestHelper.Request.Callback)

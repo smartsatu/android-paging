@@ -6,6 +6,7 @@ import com.smartsatu.android.live.NetworkState
 import io.reactivex.Completable
 
 typealias ShutdownCallbackStub = () -> Unit
+typealias ShutdownCompletable = (skipEmptyState: Boolean) -> Completable
 
 data class Paging<T>(
         val pagedList: LiveData<PagedList<T>>,
@@ -13,6 +14,6 @@ data class Paging<T>(
         val refreshState: LiveData<NetworkState>,
         val refresh: () -> Unit,
         val retry: () -> Unit,
-        val shutdown: (callback: ShutdownCallbackStub) -> Unit,
-        val shutdownCompletable: Completable? = null
+        val shutdown: (skipEmptyState: Boolean, callback: ShutdownCallbackStub) -> Unit,
+        val shutdownCompletable: ShutdownCompletable? = null
 )
